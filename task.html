@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Full Project Implementation</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; color: #333; }
+    nav { background: #00796b; padding: 1rem; display: flex; gap: 20px; justify-content: center; }
+    nav a {
+      color: white; text-decoration: none; font-weight: bold; cursor: pointer;
+      padding: 6px 12px; border-radius: 4px;
+    }
+    nav a:hover, nav a.active { background-color: #004d40; }
+
+    .section { display: none; padding: 30px; max-width: 900px; margin: auto; }
+    .section.active { display: block; }
+
+    h2 { margin-bottom: 20px; color: #00796b; }
+
+    .projects { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .project { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+
+    #todo-section input[type="text"] { padding: 10px; width: 80%; border: 1px solid #ccc; border-radius: 4px; }
+    #todo-section button { padding: 10px 15px; background: #00796b; color: white; border: none; border-radius: 4px; margin-left: 5px; }
+    #todo-list li { padding: 8px; margin-top: 10px; background: #e0f2f1; border-radius: 4px; display: flex; justify-content: space-between; }
+    .filter-sort { margin-bottom: 20px; }
+    .products { display: flex; flex-wrap: wrap; gap: 20px; }
+    .product { background: white; padding: 15px; width: 200px; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="active" onclick="showSection('portfolio')">Portfolio</a>
+  <a onclick="showSection('todo')">To-Do App</a>
+  <a onclick="showSection('products')">Product Page</a>
+</nav>
+
+<section id="portfolio" class="section active">
+  <h2>About Me</h2>
+  <p>Hello! I'm a passionate web developer with skills in HTML, CSS, and JavaScript.</p>
+
+  <h2>Projects</h2>
+  <div class="projects">
+    <div class="project"><strong>Portfolio Website</strong><br/>Multi-page responsive site</div>
+    <div class="project"><strong>To-Do App</strong><br/>LocalStorage based task manager</div>
+    <div class="project"><strong>Product Page</strong><br/>Filter and sort eCommerce items</div>
+  </div>
+
+  <h2>Contact</h2>
+  <p>Email: you@example.com</p>
+</section>
+
+<section id="todo" class="section">
+  <h2>To-Do List</h2>
+  <input type="text" id="taskInput" placeholder="Enter a task..." />
+  <button onclick="addTask()">Add</button>
+  <ul id="todo-list"></ul>
+</section>
+
+<section id="products" class="section">
+  <h2>Product Listing</h2>
+
+  <div class="filter-sort">
+    <select id="categoryFilter" onchange="renderProducts()">
+      <option value="">All Categories</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Clothing">Clothing</option>
+    </select>
+
+    <select id="sortBy" onchange="renderProducts()">
+      <option value="">Sort by</option>
+      <option value="price">Price</option>
+      <option value="rating">Rating</option>
+    </select>
+  </div>
+
+  <div class="products" id="productList"></div>
+</section>
+
+<script>
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(nav => nav.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+  }
+  const taskInput = document.getElementById('taskInput');
+  const todoList = document.getElementById('todo-list');
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+  function addTask() {
+    if (taskInput.value.trim() === "") return;
+    tasks.push(taskInput.value);
+    taskInput.value = "";
+    saveTasks();
+    renderTasks();
+  }
+
+  function removeTask(index) {
+    tasks.splice(index, 1);
+    saveTasks();
+    renderTasks();
+  }
+
+  function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }
+
+  function renderTasks() {
+    todoList.innerHTML = "";
+    tasks.forEach((task, index) => {
+      const li = document.createElement("li");
+      li.innerHTML = `${task} <button onclick="removeTask(${index})">❌</button>`;
+      todoList.appendChild(li);
+    });
+  }
+  renderTasks();
+
+  const products = [
+    { name: "Laptop", category: "Electronics", price: 999, rating: 4.5 },
+    { name: "Headphones", category: "Electronics", price: 199, rating: 4.2 },
+    { name: "T-Shirt", category: "Clothing", price: 25, rating: 4.0 },
+    { name: "Jacket", category: "Clothing", price: 75, rating: 4.8 }
+  ];
+
+  function renderProducts() {
+    const filter = document.getElementById("categoryFilter").value;
+    const sortBy = document.getElementById("sortBy").value;
+    let filtered = [...products];
+
+    if (filter) {
+      filtered = filtered.filter(p => p.category === filter);
+    }
+
+    if (sortBy === "price") {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "rating") {
+      filtered.sort((a, b) => b.rating - a.rating);
+    }
+
+    const container = document.getElementById("productList");
+    container.innerHTML = "";
+    filtered.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "product";
+      div.innerHTML = `<strong>${p.name}</strong><br>₹${p.price}<br>Rating: ${p.rating}`;
+      container.appendChild(div);
+    });
+  }
+  renderProducts();
+</script>
+</body>
+</html>
